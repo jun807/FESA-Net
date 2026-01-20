@@ -1,3 +1,4 @@
+# FESA-Net
 Medical image segmentation is pivotal for clinical diagnosis and treatment plan
 ning. Although U-Net and its variants have achieved remarkable success, their
 performance still can not meet the needs in practical applications. This critical
@@ -18,3 +19,29 @@ achieves an optimal balance between accuracy and efficiency, outperforming
 mainstream methods on multiple public datasets with minimal computational
 overhead (3.09 M parameters, 1.05 GFLOPs).
 
+## Experiment
+In the experimental section, four publicly available and widely utilized datasets are employed for testing purposes. These datasets are:
+ISIC-2018 (dermoscopy, with 2,594 images)
+Kvasir-SEG (endoscopy, with 1,000 images)
+BUSI (breast ultrasound, with 437 benign and 210 malignant images)
+CVC-ClinicDB (colonoscopy, with 612 images)
+
+For each dataset, the images are randomly split into training, validation, and test sets with a ratio of 6:2:2.
+The dataset path may look like:
+```
+/The Dataset Path/
+├── ISIC-2018/
+    ├── Train_Folder/
+    │   ├── img
+    │   ├── labelcol
+    │
+    ├── Val_Folder/
+    │   ├── img
+    │   ├── labelcol
+    │
+    ├── Test_Folder/
+        ├── img
+        ├── labelco
+```
+## Usage  
+### Installation  
