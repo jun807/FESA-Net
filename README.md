@@ -22,11 +22,11 @@ overhead (3.09 M parameters, 1.05 GFLOPs).
 ## Experiment
 In the experimental section, four publicly available and widely utilized datasets are employed for testing purposes. These datasets are:
 
-1. ISIC-2018 (dermoscopy, with 2,594 images)
-2. Kvasir-SEG (endoscopy, with 1,000 images)
-3. BUSI (breast ultrasound, with 437 benign and 210 malignant images)
-4. CVC-ClinicDB (colonoscopy, with 612 images)
-5. GlaS (gland, with 165 images)
+ ISIC-2018 (dermoscopy, with 2,594 images)
+ Kvasir-SEG (endoscopy, with 1,000 images)
+ BUSI (breast ultrasound, with 437 benign and 210 malignant images)
+ CVC-ClinicDB (colonoscopy, with 612 images)
+ GlaS (gland, with 165 images)
 
 For each dataset, the images are randomly split into training, validation, and test sets with a ratio of 6:2:2.
 The dataset path may look like:
