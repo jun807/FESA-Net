@@ -48,8 +48,8 @@ The dataset path may look like:
 ### Installation  
 ```
 https://github.com/jun807/FESA-Net.git
-conda create -n cfseg python=3.8
-conda activate cfseg
+conda create -n fesa_net python=3.8
+conda activate fesa_net
 conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
 ```
 ### Training 
