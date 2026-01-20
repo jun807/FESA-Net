@@ -29,7 +29,9 @@ In the experimental section, four publicly available and widely utilized dataset
 * GlaS (gland, with 165 images)
 
 In GlaS dataset, we split the dataset into a training set of 85 images and a test set of 80 images.
+
 In ISIC 2018 dataset, we adopt the official split configuration, consisting of a training set with 2,594 images, a validation set with 100 images, and a test set with 1,000 images.
+
 For other dataset, the images are randomly split into training, validation, and test sets with a ratio of 6:2:2.
 
 For each dataset, the images are randomly split into training, validation, and test sets with a ratio of 6:2:2.
