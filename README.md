@@ -21,6 +21,7 @@ overhead (3.09 M parameters, 1.05 GFLOPs).
 
 ## Experiment
 In the experimental section, four publicly available and widely utilized datasets are employed for testing purposes. These datasets are:
+
 ISIC-2018 (dermoscopy, with 2,594 images)
 Kvasir-SEG (endoscopy, with 1,000 images)
 BUSI (breast ultrasound, with 437 benign and 210 malignant images)
@@ -45,3 +46,20 @@ The dataset path may look like:
 ```
 ## Usage  
 ### Installation  
+```
+https://github.com/jun807/FESA-Net.git
+conda create -n cfseg python=3.8
+conda activate cfseg
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
+```
+### Training 
+```
+python train_model.py
+```
+To run on different setting or different datasets, please modify:
+batch_size, model_name, and task_name in Config.py.
+
+### Evaluation 
+```
+python test_model.py
+```
