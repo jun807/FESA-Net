@@ -73,7 +73,7 @@ class TimmEncoder(nn.Module):
 
     
 
-class Group_Spatial_att(nn.Module):
+class Patch_Attention(nn.Module):
     def __init__(self, channels, groups=4):
         super().__init__()
 
@@ -109,7 +109,7 @@ class Group_Spatial_att(nn.Module):
         
         return att
 
-class MutiScale_Patch_fft(nn.Module):
+class MSRM(nn.Module):
     def __init__(self, channels, groups=4, patch_size=7):
         super().__init__()
         # 多尺度频域增强模块
@@ -118,9 +118,9 @@ class MutiScale_Patch_fft(nn.Module):
         self.groups = groups
         
         # 三个分支的Patch FFT处理
-        self.Patch_fft1 = Patch_fft(channels=channels, groups=groups, patch_size=patch_size)
-        self.Patch_fft2 = Patch_fft(channels=channels, groups=groups, patch_size=patch_size)
-        self.Patch_fft3 = Patch_fft(channels=channels, groups=groups, patch_size=patch_size)
+        self.Patch_fft1 = PSR(channels=channels, groups=groups, patch_size=patch_size)
+        self.Patch_fft2 = PSR(channels=channels, groups=groups, patch_size=patch_size)
+        self.Patch_fft3 = PSR(channels=channels, groups=groups, patch_size=patch_size)
 
         # 多尺度卷积分支
         # 分支1：3x3组卷积
@@ -192,7 +192,7 @@ class MutiScale_Patch_fft(nn.Module):
 
 
 
-class Patch_fft(nn.Module):
+class PSR(nn.Module):
     def __init__(self, channels, groups=4, patch_size=8):
         super().__init__()
         # 你的模块初始化代码
@@ -201,7 +201,7 @@ class Patch_fft(nn.Module):
         self.groups = groups
         #self.spatial_att = Spatial_att2()
 
-        self.group_spatial_att = Group_Spatial_att(channels=channels, groups=groups)
+        self.patch_attention = Patch_Attention(channels=channels, groups=groups)
 
         self.freq_weight = nn.Parameter(
             torch.ones(channels, 1, 1, patch_size, patch_size // 2 + 1)
@@ -226,7 +226,7 @@ class Patch_fft(nn.Module):
 
         # x_patch shape: [B, C, hh, ww, ps, ps]
         x_patch_avg = x_patch.mean(dim=(-2, -1), keepdim=False)  # 空间池化
-        patch_att = self.group_spatial_att(x_patch_avg)
+        patch_att = self.patch_attention(x_patch_avg)
 
         # (B, C_per_group, hh, ww, ps, ps)
         patch_att = patch_att.unsqueeze(-1).unsqueeze(-1)  # -> [B, groups, hh, ww, 1, 1]
@@ -386,7 +386,7 @@ class CLCF(nn.Module):
 
         return out
     
-class ThreeFuseAttention(nn.Module):
+class CLFM(nn.Module):
     def __init__(self, feat1_channels, feat2_channels, x_channels):
         super().__init__()
 
@@ -444,15 +444,15 @@ class FESA_Net(nn.Module):
         feature_channels = self.encoder.get_feature_channels()
         self.feature_channels = feature_channels
 
-        self.three_fuse1 = ThreeFuseAttention(feature_channels[-3], feature_channels[-1], feature_channels[-2])
-        self.three_fuse2 = ThreeFuseAttention(feature_channels[-4], feature_channels[-2], feature_channels[-3])
-        self.three_fuse3 = ThreeFuseAttention(feature_channels[-5], feature_channels[-3], feature_channels[-4])
+        self.clfm1 = CLFM(feature_channels[-3], feature_channels[-1], feature_channels[-2])
+        self.clfm2 = CLFM(feature_channels[-4], feature_channels[-2], feature_channels[-3])
+        self.clfm3 = CLFM(feature_channels[-5], feature_channels[-3], feature_channels[-4])
 
 
-        self.multiscale_patch_fft1 = MutiScale_Patch_fft(channels=feature_channels[-2], groups=4, patch_size=7)
-        self.multiscale_patch_fft2 = MutiScale_Patch_fft(channels=feature_channels[-3], groups=4, patch_size=7)
-        self.multiscale_patch_fft3 = MutiScale_Patch_fft(channels=feature_channels[-4], groups=4, patch_size=7)
-        self.multiscale_patch_fft4 = MutiScale_Patch_fft(channels=feature_channels[-5], groups=4, patch_size=7)
+        self.msrm1 = MSRM(channels=feature_channels[-2], groups=4, patch_size=7)
+        self.msrm2 = MSRM(channels=feature_channels[-3], groups=4, patch_size=7)
+        self.msrm3 = MSRM(channels=feature_channels[-4], groups=4, patch_size=7)
+        self.msrm4 = MSRM(channels=feature_channels[-5], groups=4, patch_size=7)
     
         # 解码器部分 - 使用MobileNet风格块
         decoder_channels = feature_channels[-1]
@@ -480,16 +480,16 @@ class FESA_Net(nn.Module):
         x = encoder_features[-1] 
         
         # 解码器部分
-        y = self.three_fuse1(encoder_features[-2], encoder_features[-3], encoder_features[-1]) 
-        y = self.multiscale_patch_fft1(y)
+        y = self.clfm1(encoder_features[-2], encoder_features[-3], encoder_features[-1]) 
+        y = self.msrm1(y)
         x = self.up5(x, y)
-        y = self.three_fuse2(encoder_features[-3], encoder_features[-4], encoder_features[-2])
-        y = self.multiscale_patch_fft2(y)
+        y = self.clfm2(encoder_features[-3], encoder_features[-4], encoder_features[-2])
+        y = self.msrm2(y)
         x = self.up4(x, y)
-        y = self.three_fuse3(encoder_features[-4], encoder_features[-5], encoder_features[-3])
-        y = self.multiscale_patch_fft3(y)
+        y = self.clfm3(encoder_features[-4], encoder_features[-5], encoder_features[-3])
+        y = self.msrm3(y)
         x = self.up3(x, y)
-        y = self.multiscale_patch_fft4(encoder_features[-5])
+        y = self.msrm4(encoder_features[-5])
         x = self.up2(x, y)
         x = self.up1(x, None)
 
